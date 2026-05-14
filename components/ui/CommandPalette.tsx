@@ -57,7 +57,7 @@ export default function CommandPalette() {
           </button>
 
           <button className="w-full rounded-xl border p-4 text-left hover:bg-gray-100">
-            Invite Team Member
+            Invite Team Employee
           </button>
         </div>
       </div>

@@ -19,7 +19,7 @@ export default function StatsGrid() {
       />
 
       <StatsCard
-        title="Team Members"
+        title="Team Employees"
         value={28}
       />
     </div>

@@ -116,9 +116,9 @@ export const sampleTeamMembers = [
   },
 ];
 
-const memberForProject = (projectId: string, userIds: string[]) =>
+const employeeForProject = (projectId: string, userIds: string[]) =>
   userIds.map((userId) => {
-    const user = sampleTeamMembers.find((m) => m.id === userId) ?? sampleTeamMembers[0];
+    const user = sampleTeamMembers.find((e) => e.id === userId) ?? sampleTeamMembers[0];
     return {
       id: `member-${projectId}-${user.id}`,
       userId: user.id,
@@ -147,7 +147,7 @@ export const sampleProjects = [
     createdAt: now,
     updatedAt: now,
     owner: sampleUser,
-    members: memberForProject("project-1", ["sample-user-1", "sample-user-2", "sample-user-3"]),
+    members: employeeForProject("project-1", ["sample-user-1", "sample-user-2", "sample-user-3"]),
     _count: { tasks: 5 },
   },
   {
@@ -165,7 +165,7 @@ export const sampleProjects = [
     createdAt: now,
     updatedAt: addDays(1),
     owner: sampleUser,
-    members: memberForProject("project-2", ["sample-user-2", "sample-user-4", "sample-user-5"]),
+    members: employeeForProject("project-2", ["sample-user-2", "sample-user-4", "sample-user-5"]),
     _count: { tasks: 4 },
   },
   {
@@ -183,7 +183,7 @@ export const sampleProjects = [
     createdAt: addDays(-10),
     updatedAt: addDays(-1),
     owner: sampleUser,
-    members: memberForProject("project-4", ["sample-user-7", "sample-user-8", "sample-user-4", "sample-user-5"]),
+    members: employeeForProject("project-4", ["sample-user-7", "sample-user-8", "sample-user-4", "sample-user-5"]),
     _count: { tasks: 5 },
   },
   {
@@ -201,7 +201,7 @@ export const sampleProjects = [
     createdAt: addDays(-5),
     updatedAt: now,
     owner: sampleUser,
-    members: memberForProject("project-5", ["sample-user-6", "sample-user-10", "sample-user-3"]),
+    members: employeeForProject("project-5", ["sample-user-6", "sample-user-10", "sample-user-3"]),
     _count: { tasks: 4 },
   },
   {
@@ -219,7 +219,7 @@ export const sampleProjects = [
     createdAt: addDays(-2),
     updatedAt: now,
     owner: sampleUser,
-    members: memberForProject("project-6", ["sample-user-9", "sample-user-7", "sample-user-2"]),
+    members: employeeForProject("project-6", ["sample-user-9", "sample-user-7", "sample-user-2"]),
     _count: { tasks: 3 },
   },
   // ── Completed ──
@@ -238,7 +238,7 @@ export const sampleProjects = [
     createdAt: now,
     updatedAt: addDays(2),
     owner: sampleUser,
-    members: memberForProject("project-3", ["sample-user-1", "sample-user-3", "sample-user-5"]),
+    members: employeeForProject("project-3", ["sample-user-1", "sample-user-3", "sample-user-5"]),
     _count: { tasks: 3 },
   },
   {
@@ -256,7 +256,7 @@ export const sampleProjects = [
     createdAt: addDays(-30),
     updatedAt: addDays(-6),
     owner: sampleUser,
-    members: memberForProject("project-7", ["sample-user-4", "sample-user-2", "sample-user-7"]),
+    members: employeeForProject("project-7", ["sample-user-4", "sample-user-2", "sample-user-7"]),
     _count: { tasks: 4 },
   },
   {
@@ -274,7 +274,7 @@ export const sampleProjects = [
     createdAt: addDays(-45),
     updatedAt: addDays(-11),
     owner: sampleUser,
-    members: memberForProject("project-8", ["sample-user-10", "sample-user-6", "sample-user-1"]),
+    members: employeeForProject("project-8", ["sample-user-10", "sample-user-6", "sample-user-1"]),
     _count: { tasks: 3 },
   },
 ];
@@ -296,7 +296,7 @@ export const sampleTasks = [
   // project-3
   { id: "task-6",  title: "Finalize role permissions",          description: "Confirm ADMIN, MANAGER, and MEMBER behavior for demo flows.",        status: "COMPLETED" as TaskStatus,  priority: "MEDIUM" as Priority, dueDate: addDays(10), order: 0, assignedToId: sampleUser.id, createdById: sampleUser.id, projectId: "project-3", deletedAt: null, createdAt: now, updatedAt: now, assignedTo: sampleTeamMembers[2], project: { id: "project-3", title: "Team Operations Setup" }, comments: [], attachments: [] },
   { id: "task-7",  title: "Set weekly reporting template",      description: "Define what belongs on the dashboard every week.",                  status: "COMPLETED" as TaskStatus,  priority: "LOW" as Priority,    dueDate: addDays(12), order: 1, assignedToId: sampleUser.id, createdById: sampleUser.id, projectId: "project-3", deletedAt: null, createdAt: now, updatedAt: now, assignedTo: sampleTeamMembers[4], project: { id: "project-3", title: "Team Operations Setup" }, comments: [], attachments: [] },
-  { id: "task-18", title: "Onboard new joiners checklist",      description: "Document steps and tools needed for onboarding any new team member.",status: "COMPLETED" as TaskStatus,  priority: "LOW" as Priority,    dueDate: addDays(6),  order: 2, assignedToId: sampleUser.id, createdById: sampleUser.id, projectId: "project-3", deletedAt: null, createdAt: now, updatedAt: now, assignedTo: sampleTeamMembers[0], project: { id: "project-3", title: "Team Operations Setup" }, comments: [], attachments: [] },
+  { id: "task-18", title: "Onboard new joiners checklist",      description: "Document steps and tools needed for onboarding any new team employee.",status: "COMPLETED" as TaskStatus,  priority: "LOW" as Priority,    dueDate: addDays(6),  order: 2, assignedToId: sampleUser.id, createdById: sampleUser.id, projectId: "project-3", deletedAt: null, createdAt: now, updatedAt: now, assignedTo: sampleTeamMembers[0], project: { id: "project-3", title: "Team Operations Setup" }, comments: [], attachments: [] },
 
   // project-4
   { id: "task-8",  title: "Implement offline mode cache",       description: "Use service workers to cache key screens for offline access.",       status: "IN_PROGRESS" as TaskStatus, priority: "HIGH" as Priority,   dueDate: addDays(12), order: 0, assignedToId: sampleUser.id, createdById: sampleUser.id, projectId: "project-4", deletedAt: null, createdAt: now, updatedAt: now, assignedTo: sampleTeamMembers[7], project: { id: "project-4", title: "Mobile App v2 Launch" }, comments: [], attachments: [] },

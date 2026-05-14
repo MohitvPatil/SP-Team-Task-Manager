@@ -1,6 +1,6 @@
 import api from "@/lib/axios";
 
-export const inviteMember =
+export const inviteEmployee =
   async (email: string) => {
     const response =
       await api.post(

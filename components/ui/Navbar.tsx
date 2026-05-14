@@ -4,13 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import UserDropdown from "@/components/ui/UserDropdown";
 import ThemeToggle from "@/components/ui/ThemeToggle";
-import { LayoutDashboard, FolderKanban, CheckSquare, CalendarDays } from "lucide-react";
+import { LayoutDashboard, FolderKanban, CheckSquare, CalendarDays, Users } from "lucide-react";
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/projects",  label: "Projects",  icon: FolderKanban  },
   { href: "/tasks",     label: "Tasks",     icon: CheckSquare   },
   { href: "/deadlines", label: "Deadlines", icon: CalendarDays  },
+  { href: "/employees", label: "Employees", icon: Users         },
 ];
 
 export default function Navbar() {

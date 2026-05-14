@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
-interface ProjectMember {
+interface ProjectEmployee {
   id: string;
   userId: string;
   projectId: string;
@@ -61,11 +61,11 @@ interface Project {
   createdAt: string;
   updatedAt: string;
   owner: { id: string; name: string; email: string; role: string; imageUrl: string | null };
-  members: ProjectMember[];
+  members: ProjectEmployee[];
   _count: { tasks: number };
 }
 
-interface TeamMember {
+interface TeamEmployee {
   id: string;
   name: string;
   email: string;
@@ -76,7 +76,7 @@ interface TeamMember {
   availability: string;
 }
 
-interface MemberFormData {
+interface EmployeeFormData {
   name: string;
   email: string;
   position: string;
@@ -93,20 +93,6 @@ const fmt = (iso: string | null) =>
     : "—";
 
 const toInputDate = (iso: string | null) => (iso ? iso.slice(0, 10) : "");
-
-const buildMembers = (projectId: string, userIds: string[]) =>
-  userIds.map((uid) => {
-    const u = sampleTeamMembers.find((m) => m.id === uid) ?? sampleTeamMembers[0];
-    return {
-      id: `member-${projectId}-${u.id}`,
-      userId: u.id,
-      projectId,
-      role: u.role,
-      position: u.position,
-      createdAt: new Date().toISOString(),
-      user: u,
-    };
-  });
 
 // ── Project Card ──────────────────────────────────────────────────────────────
 function ProjectCard({
@@ -137,7 +123,6 @@ function ProjectCard({
 
   return (
     <div className="group relative flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-950 transition-colors">
-      {/* Top row */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <Link href={`/projects/${project.id}`} className="hover:underline">
@@ -152,7 +137,6 @@ function ProjectCard({
         </span>
       </div>
 
-      {/* Meta */}
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
         <span className="flex items-center gap-1">
           <Clock size={11} />
@@ -168,7 +152,6 @@ function ProjectCard({
         </span>
       </div>
 
-      {/* Progress */}
       <div>
         <div className="mb-1 flex justify-between text-xs text-gray-400">
           <span>Progress</span>
@@ -182,41 +165,33 @@ function ProjectCard({
         </div>
       </div>
 
-      {/* Member chips */}
       {project.members.length > 0 && (
         <div className="flex flex-wrap gap-1">
-          {project.members.map((m) => (
+          {project.members.map((e) => (
             <span
-              key={m.id}
+              key={e.id}
               className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600"
             >
-              {m.user.name.split(" ")[0]}
+              {e.user.name.split(" ")[0]}
             </span>
           ))}
-        </div>
-      )}
-
-      {/* Lead actions — appear on hover */}
-      {isLead && (
-        <div className="absolute right-3 top-3 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          {/* Action buttons could go here in the future */}
         </div>
       )}
     </div>
   );
 }
 
-// ── Member Modal ──────────────────────────────────────────────────────────────
-function MemberModal({
+// ── Employee Modal ──────────────────────────────────────────────────────────────
+function EmployeeModal({
   initial,
   onSave,
   onClose,
 }: {
-  initial: MemberFormData | null;
-  onSave: (d: MemberFormData) => void;
+  initial: EmployeeFormData | null;
+  onSave: (d: EmployeeFormData) => void;
   onClose: () => void;
 }) {
-  const [form, setForm] = useState<MemberFormData>(
+  const [form, setForm] = useState<EmployeeFormData>(
     initial ?? { name: "", email: "", position: "", role: "MEMBER", department: "" }
   );
 
@@ -225,17 +200,15 @@ function MemberModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
       <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-2xl">
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
           <h2 className="text-sm font-semibold text-gray-900">
-            {initial ? "Edit Member" : "Add Member"}
+            {initial ? "Edit Employee" : "Add Employee"}
           </h2>
           <button onClick={onClose} className="rounded-lg p-1 hover:bg-gray-100">
             <X size={16} />
           </button>
         </div>
 
-        {/* Body */}
         <div className="space-y-3 px-6 py-5">
           <div>
             <label className="mb-1 block text-xs font-medium text-gray-600">Name *</label>
@@ -288,7 +261,6 @@ function MemberModal({
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex justify-end gap-2 border-t border-gray-100 px-6 py-4">
           <button
             onClick={onClose}
@@ -313,50 +285,48 @@ function MemberModal({
 export default function DashboardPage() {
   const isLead = sampleUser.role === "ADMIN" || sampleUser.role === "MANAGER";
 
-  // ── Project state ──
   const [projects, setProjects] = useState<Project[]>(sampleProjects);
   const [modal, setModal] = useState<"add" | "edit" | null>(null);
   const [editTarget, setEditTarget] = useState<Project | null>(null);
 
-  // ── Member state ──
-  const [members, setMembers] = useState<TeamMember[]>(sampleTeamMembers);
-  const [memberModal, setMemberModal] = useState<"add" | "edit" | null>(null);
-  const [editMember, setEditMember] = useState<TeamMember | null>(null);
+  const [employees, setEmployees] = useState<TeamEmployee[]>(sampleTeamMembers);
+  const [employeeModal, setEmployeeModal] = useState<"add" | "edit" | null>(null);
+  const [editEmployee, setEditEmployee] = useState<TeamEmployee | null>(null);
 
-  const openAddMember = () => { setEditMember(null); setMemberModal("add"); };
-  const openEditMember = (m: TeamMember) => { setEditMember(m); setMemberModal("edit"); };
-  const closeMemberModal = () => { setMemberModal(null); setEditMember(null); };
+  const openAddEmployee = () => { setEditEmployee(null); setEmployeeModal("add"); };
+  const openEditEmployee = (e: TeamEmployee) => { setEditEmployee(e); setEmployeeModal("edit"); };
+  const closeEmployeeModal = () => { setEmployeeModal(null); setEditEmployee(null); };
 
-  const handleDeleteMember = (id: string) => {
-    if (window.confirm("Remove this member from the team?"))
-      setMembers((prev) => prev.filter((m) => m.id !== id));
+  const handleDeleteEmployee = (id: string) => {
+    if (window.confirm("Remove this employee from the team?"))
+      setEmployees((prev) => prev.filter((e) => e.id !== id));
   };
 
-  const handleSaveMember = (data: MemberFormData) => {
-    if (memberModal === "add") {
+  const handleSaveEmployee = (data: EmployeeFormData) => {
+    if (employeeModal === "add") {
       const id = createSampleId("user");
-      setMembers((prev) => [
+      setEmployees((prev) => [
         ...prev,
         { id, name: data.name, email: data.email, role: data.role,
           imageUrl: null, position: data.position, department: data.department,
           availability: "Available" },
       ]);
-    } else if (memberModal === "edit" && editMember) {
-      setMembers((prev) =>
-        prev.map((m) =>
-          m.id === editMember.id
-            ? { ...m, name: data.name, email: data.email, role: data.role,
+    } else if (employeeModal === "edit" && editEmployee) {
+      setEmployees((prev) =>
+        prev.map((e) =>
+          e.id === editEmployee.id
+            ? { ...e, name: data.name, email: data.email, role: data.role,
                 position: data.position, department: data.department }
-            : m
+            : e
         )
       );
     }
-    closeMemberModal();
+    closeEmployeeModal();
   };
 
-  const memberInitialForm: MemberFormData | null = editMember
-    ? { name: editMember.name, email: editMember.email, position: editMember.position,
-        role: editMember.role, department: editMember.department }
+  const employeeInitialForm: EmployeeFormData | null = editEmployee
+    ? { name: editEmployee.name, email: editEmployee.email, position: editEmployee.position,
+        role: editEmployee.role, department: editEmployee.department }
     : null;
 
   const planning  = projects.filter((p) => p.state === "PLANNING");
@@ -366,13 +336,7 @@ export default function DashboardPage() {
   const activeCount = planning.length + ongoing.length + onHold.length;
 
   const openAdd = () => { setEditTarget(null); setModal("add"); };
-  const openEdit = (p: Project) => { setEditTarget(p); setModal("edit"); };
   const closeModal = () => { setModal(null); setEditTarget(null); };
-
-  const handleDelete = (id: string) => {
-    if (window.confirm("Delete this project?"))
-      setProjects((prev) => prev.filter((p) => p.id !== id));
-  };
 
   const handleStatusChange = (id: string, state: ProjectState, health: ProjectHealth) => {
     setProjects((prev) =>
@@ -398,21 +362,6 @@ export default function DashboardPage() {
           owner: sampleUser, members: [], _count: { tasks: 0 },
         },
       ]);
-    } else if (modal === "edit" && editTarget) {
-      setProjects((prev) =>
-        prev.map((p) =>
-          p.id === editTarget.id
-            ? {
-                ...p, title: data.title, description: data.description,
-                assignedAt: data.assignedAt ? new Date(data.assignedAt).toISOString() : p.assignedAt,
-                deadline: data.deadline ? new Date(data.deadline).toISOString() : p.deadline,
-                state: data.state, health: data.health,
-                completedAt: data.state === "COMPLETED" ? (p.completedAt ?? new Date().toISOString()) : null,
-                updatedAt: new Date().toISOString(),
-              }
-            : p
-        )
-      );
     }
     closeModal();
   };
@@ -426,17 +375,15 @@ export default function DashboardPage() {
       }
     : null;
 
-return (
+  return (
     <ProtectedRoute>
       {modal && <ProjectModal initial={initialForm} onSave={handleSave} onClose={closeModal} />}
-      {memberModal && <MemberModal initial={memberInitialForm} onSave={handleSaveMember} onClose={closeMemberModal} />}
+      {employeeModal && <EmployeeModal initial={employeeInitialForm} onSave={handleSaveEmployee} onClose={closeEmployeeModal} />}
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors">
         <Navbar />
 
         <main className="mx-auto max-w-7xl px-4 py-8 md:px-8">
-
-          {/* ── Page heading ── */}
           <div className="mb-8 flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Dashboard</h1>
@@ -453,12 +400,11 @@ return (
             )}
           </div>
 
-          {/* ── Stat strip ── */}
           <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
               { label: "Active",    value: activeCount,                                           icon: TrendingUp },
               { label: "Completed", value: completed.length,                                      icon: CalendarDays },
-              { label: "Members",   value: members.length,                                        icon: Users },
+              { label: "Employees", value: employees.length,                                      icon: Users },
               { label: "At Risk",   value: projects.filter((p) => p.health === "At Risk").length, icon: Clock },
             ].map(({ label, value, icon: Icon }) => (
               <div key={label} className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 transition-colors">
@@ -473,7 +419,7 @@ return (
             ))}
           </div>
 
-          {/* ── Section 1: Planning ── */}
+          {/* Section 1: Planning */}
           {(planning.length > 0 || isLead) && (
             <section className="mb-10">
               <div className="mb-3 flex items-center justify-between">
@@ -503,7 +449,7 @@ return (
             </section>
           )}
 
-          {/* ── Section 2: Ongoing ── */}
+          {/* Section 2: Ongoing */}
           <section className="mb-10">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
@@ -520,10 +466,7 @@ return (
             </div>
             {ongoing.length === 0 ? (
               <div className="rounded-xl border border-dashed border-gray-200 dark:border-gray-800 py-6 text-center text-sm text-gray-400">
-                No ongoing projects.{" "}
-                {isLead && (
-                  <button onClick={openAdd} className="font-medium underline">Create one.</button>
-                )}
+                No ongoing projects.
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -534,8 +477,8 @@ return (
             )}
           </section>
 
-          {/* ── Section 3: On Hold ── */}
-          {(onHold.length > 0) && (
+          {/* Section 3: On Hold */}
+          {onHold.length > 0 && (
             <section className="mb-10">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
@@ -553,18 +496,18 @@ return (
             </section>
           )}
 
-          {/* ── Section 2: Team Members ── */}
+          {/* Section 4: Team Employees */}
           <section className="mb-10">
             <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                  Team Members
+                  Team Employees
                   <span className="ml-2 rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-xs font-normal text-gray-500 dark:text-gray-400">
-                    {members.length}
+                    {employees.length}
                   </span>
                 </h2>
               {isLead && (
                 <button
-                  onClick={openAddMember}
+                  onClick={openAddEmployee}
                   className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800"
                 >
                   <Plus size={12} /> Add
@@ -573,43 +516,42 @@ return (
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              {members.map((m) => (
+              {employees.map((e) => (
                 <div
-                  key={m.id}
+                  key={e.id}
                   className="group relative flex flex-col items-center rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-5 text-center transition-colors"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-900 text-sm font-bold text-white">
-                    {m.name.charAt(0)}
+                    {e.name.charAt(0)}
                   </div>
-                  <p className="mt-2.5 text-xs font-semibold text-gray-900 dark:text-white">{m.name}</p>
-                  <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">{m.position}</p>
+                  <p className="mt-2.5 text-xs font-semibold text-gray-900 dark:text-white">{e.name}</p>
+                  <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">{e.position}</p>
                   <span
                     className={`mt-2 rounded-full px-2 py-0.5 text-xs font-medium ${
-                      m.role === "ADMIN"
+                      e.role === "ADMIN"
                         ? "bg-gray-900 text-white"
-                        : m.role === "MANAGER"
+                        : e.role === "MANAGER"
                         ? "bg-blue-50 text-blue-700"
                         : "bg-gray-100 text-gray-600"
                     }`}
                   >
-                    {m.role}
+                    {e.role}
                   </span>
-                  {m.department && (
-                    <p className="mt-1 text-xs text-gray-400">{m.department}</p>
+                  {e.department && (
+                    <p className="mt-1 text-xs text-gray-400">{e.department}</p>
                   )}
 
-                  {/* Lead actions — appear on hover */}
                   {isLead && (
                     <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                       <button
-                        onClick={() => openEditMember(m)}
+                        onClick={() => openEditEmployee(e)}
                         title="Edit"
                         className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       >
                         <Pencil size={11} className="dark:text-gray-300" />
                       </button>
                       <button
-                        onClick={() => handleDeleteMember(m.id)}
+                        onClick={() => handleDeleteEmployee(e.id)}
                         title="Remove"
                         className="rounded-md border border-red-100 dark:border-red-900/30 bg-white dark:bg-red-950/20 p-1 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                       >
@@ -622,7 +564,7 @@ return (
             </div>
           </section>
 
-          {/* ── Section 3: Completed Projects ── */}
+          {/* Section 5: Completed Projects */}
           <section>
             <h2 className="mb-3 text-sm font-semibold text-gray-800 dark:text-gray-200">
               Completed Projects

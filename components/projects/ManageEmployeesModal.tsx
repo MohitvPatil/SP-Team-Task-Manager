@@ -2,19 +2,19 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { sampleTeamMembers } from "@/lib/sample-data";
 
-export default function ManageMembersModal({
-  initialMemberIds,
+export default function ManageEmployeesModal({
+  initialEmployeeIds,
   onSave,
   onClose,
 }: {
-  initialMemberIds: string[];
-  onSave: (memberIds: string[]) => void;
+  initialEmployeeIds: string[];
+  onSave: (employeeIds: string[]) => void;
   onClose: () => void;
 }) {
-  const [memberIds, setMemberIds] = useState<string[]>(initialMemberIds);
+  const [employeeIds, setEmployeeIds] = useState<string[]>(initialEmployeeIds);
 
   const toggle = (id: string) => {
-    setMemberIds((prev) =>
+    setEmployeeIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
@@ -23,7 +23,7 @@ export default function ManageMembersModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
       <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-          <h2 className="text-sm font-semibold text-gray-900">Manage Team Members</h2>
+          <h2 className="text-sm font-semibold text-gray-900">Manage Team Employees</h2>
           <button onClick={onClose} className="rounded-lg p-1 hover:bg-gray-100">
             <X size={16} />
           </button>
@@ -31,12 +31,12 @@ export default function ManageMembersModal({
 
         <div className="px-6 py-5">
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {sampleTeamMembers.map((m) => {
-              const active = memberIds.includes(m.id);
+            {sampleTeamMembers.map((e) => {
+              const active = employeeIds.includes(e.id);
               return (
                 <button
-                  key={m.id}
-                  onClick={() => toggle(m.id)}
+                  key={e.id}
+                  onClick={() => toggle(e.id)}
                   className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-xs transition ${
                     active
                       ? "border-gray-800 bg-gray-900 text-white"
@@ -48,11 +48,11 @@ export default function ManageMembersModal({
                       active ? "bg-white text-gray-900" : "bg-gray-100 text-gray-600"
                     }`}
                   >
-                    {m.name.charAt(0)}
+                    {e.name.charAt(0)}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="block truncate font-medium">{m.name.split(" ")[0]}</span>
-                    <span className="block truncate text-[10px] opacity-80">{m.position}</span>
+                    <span className="block truncate font-medium">{e.name.split(" ")[0]}</span>
+                    <span className="block truncate text-[10px] opacity-80">{e.position}</span>
                   </div>
                 </button>
               );
@@ -68,7 +68,7 @@ export default function ManageMembersModal({
             Cancel
           </button>
           <button
-            onClick={() => onSave(memberIds)}
+            onClick={() => onSave(employeeIds)}
             className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
           >
             Save Changes
