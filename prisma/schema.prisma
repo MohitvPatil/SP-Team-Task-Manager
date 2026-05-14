@@ -37,6 +37,7 @@ enum NotificationType {
 
 model User {
   id                String              @id @default(cuid())
+  employeeId        String?             @unique
   name              String
   email             String              @unique
   password          String?
@@ -57,6 +58,7 @@ model User {
   auditLogs         AuditLog[]
 
   @@index([role])
+  @@index([employeeId])
   @@index([deletedAt])
 }
 
@@ -72,6 +74,7 @@ model Project {
   members     ProjectMember[]
   tasks       Task[]
   files       Attachment[]
+  invites     ProjectInvite[]
 
   @@index([ownerId])
   @@index([deletedAt])
@@ -83,12 +86,29 @@ model ProjectMember {
   userId    String
   projectId String
   role      Role     @default(MEMBER)
+  position  String?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([userId, projectId])
   @@index([projectId])
+}
+
+model ProjectInvite {
+  id        String   @id @default(cuid())
+  email     String
+  projectId String
+  role      Role     @default(MEMBER)
+  position  String?
+  token     String   @unique
+  accepted  Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([email, projectId])
+  @@index([token])
 }
 
 model Task {

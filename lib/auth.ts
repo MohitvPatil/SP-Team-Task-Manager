@@ -5,6 +5,7 @@ import { sampleUser } from "@/lib/sample-data";
 
 export type SessionUser = {
   id: string;
+  employeeId: string;
   name: string;
   email: string;
   role: "ADMIN" | "MANAGER" | "MEMBER";

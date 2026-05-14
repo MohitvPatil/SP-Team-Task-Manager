@@ -1,5 +1,6 @@
 export interface EmployeeSecondaryDetail {
   id: string;
+  employeeId: string;
   phone: string;
   joinedDate: string;
   salary: string;
@@ -12,6 +13,7 @@ export interface EmployeeSecondaryDetail {
 export const extendedEmployees: EmployeeSecondaryDetail[] = [
   {
     id: "sample-user-1",
+    employeeId: "EMP-001",
     phone: "+91 98765 43210",
     joinedDate: "2023-01-15",
     salary: "₹18,00,000",
@@ -21,6 +23,7 @@ export const extendedEmployees: EmployeeSecondaryDetail[] = [
   },
   {
     id: "sample-user-2",
+    employeeId: "EMP-002",
     phone: "+91 98765 43211",
     joinedDate: "2023-03-20",
     salary: "₹12,00,000",
@@ -30,6 +33,7 @@ export const extendedEmployees: EmployeeSecondaryDetail[] = [
   },
   {
     id: "sample-user-3",
+    employeeId: "EMP-003",
     phone: "+91 98765 43212",
     joinedDate: "2023-02-10",
     salary: "₹15,00,000",
@@ -39,6 +43,7 @@ export const extendedEmployees: EmployeeSecondaryDetail[] = [
   },
   {
     id: "sample-user-4",
+    employeeId: "EMP-004",
     phone: "+91 98765 43213",
     joinedDate: "2023-05-15",
     salary: "₹10,50,000",
@@ -48,6 +53,7 @@ export const extendedEmployees: EmployeeSecondaryDetail[] = [
   },
   {
     id: "sample-user-5",
+    employeeId: "EMP-005",
     phone: "+91 98765 43214",
     joinedDate: "2023-01-05",
     salary: "₹14,00,000",
@@ -57,6 +63,7 @@ export const extendedEmployees: EmployeeSecondaryDetail[] = [
   },
   {
     id: "sample-user-6",
+    employeeId: "EMP-006",
     phone: "+91 98765 43215",
     joinedDate: "2023-06-01",
     salary: "₹11,50,000",
@@ -66,6 +73,7 @@ export const extendedEmployees: EmployeeSecondaryDetail[] = [
   },
   {
     id: "sample-user-7",
+    employeeId: "EMP-007",
     phone: "+91 98765 43216",
     joinedDate: "2023-04-12",
     salary: "₹16,50,000",
@@ -75,6 +83,7 @@ export const extendedEmployees: EmployeeSecondaryDetail[] = [
   },
   {
     id: "sample-user-8",
+    employeeId: "EMP-008",
     phone: "+91 98765 43217",
     joinedDate: "2023-07-22",
     salary: "₹9,80,000",
@@ -84,6 +93,7 @@ export const extendedEmployees: EmployeeSecondaryDetail[] = [
   },
   {
     id: "sample-user-9",
+    employeeId: "EMP-009",
     phone: "+91 98765 43218",
     joinedDate: "2023-08-10",
     salary: "₹11,00,000",
@@ -93,6 +103,7 @@ export const extendedEmployees: EmployeeSecondaryDetail[] = [
   },
   {
     id: "sample-user-10",
+    employeeId: "EMP-010",
     phone: "+91 98765 43219",
     joinedDate: "2023-09-05",
     salary: "₹13,50,000",
@@ -105,6 +116,7 @@ export const extendedEmployees: EmployeeSecondaryDetail[] = [
 // Helper type for the combined view used in UI
 export interface EmployeeFullDetail {
   id: string;
+  employeeId: string;
   name: string;
   email: string;
   role: string;

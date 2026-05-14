@@ -67,6 +67,7 @@ interface Project {
 
 interface TeamEmployee {
   id: string;
+  employeeId: string;
   name: string;
   email: string;
   role: string;
@@ -184,96 +185,131 @@ function ProjectCard({
 // ── Employee Modal ──────────────────────────────────────────────────────────────
 function EmployeeModal({
   initial,
+  projects,
+  onInvite,
   onSave,
   onClose,
 }: {
   initial: EmployeeFormData | null;
+  projects: Project[];
+  onInvite: (email: string, projectId: string, role: string, position: string) => void;
   onSave: (d: EmployeeFormData) => void;
   onClose: () => void;
 }) {
   const [form, setForm] = useState<EmployeeFormData>(
     initial ?? { name: "", email: "", position: "", role: "MEMBER", department: "" }
   );
+  const [selectedProjectId, setSelectedProjectId] = useState(projects[0]?.id || "");
 
-  const valid = form.name.trim() && form.email.trim() && form.position.trim();
+  const isInvite = !initial;
+  const valid = isInvite 
+    ? form.email.trim() && form.position.trim() && selectedProjectId
+    : form.name.trim() && form.email.trim() && form.position.trim();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
-      <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-          <h2 className="text-sm font-semibold text-gray-900">
-            {initial ? "Edit Employee" : "Add Employee"}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 transition-all">
+      <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-2xl overflow-hidden dark:bg-gray-950 dark:border-gray-800">
+        <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+          <h2 className="text-sm font-bold text-gray-900 dark:text-white">
+            {isInvite ? "Invite to Project" : "Edit Employee"}
           </h2>
-          <button onClick={onClose} className="rounded-lg p-1 hover:bg-gray-100">
+          <button onClick={onClose} className="rounded-lg p-1 hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-400">
             <X size={16} />
           </button>
         </div>
 
-        <div className="space-y-3 px-6 py-5">
+        <div className="space-y-4 px-6 py-5">
+          {isInvite && (
+            <div>
+              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">Project *</label>
+              <select
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white px-3 py-2.5 text-sm outline-none focus:border-gray-800 transition-colors appearance-none"
+                value={selectedProjectId}
+                onChange={(e) => setSelectedProjectId(e.target.value)}
+              >
+                {projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
+              </select>
+            </div>
+          )}
+
+          {!isInvite && (
+            <div>
+              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">Name *</label>
+              <input
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white px-3 py-2.5 text-sm outline-none focus:border-gray-800 transition-colors"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="e.g. Rahul Sharma"
+              />
+            </div>
+          )}
+
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">Name *</label>
-            <input
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="e.g. Rahul Sharma"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">Email *</label>
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">Email Address *</label>
             <input
               type="email"
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800"
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white px-3 py-2.5 text-sm outline-none focus:border-gray-800 transition-colors"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="e.g. rahul@company.com"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">Position *</label>
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">Position *</label>
             <input
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800"
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white px-3 py-2.5 text-sm outline-none focus:border-gray-800 transition-colors"
               value={form.position}
               onChange={(e) => setForm({ ...form, position: e.target.value })}
               placeholder="e.g. Frontend Engineer"
             />
           </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">Department</label>
-            <input
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800"
-              value={form.department}
-              onChange={(e) => setForm({ ...form, department: e.target.value })}
-              placeholder="e.g. Engineering"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">Role</label>
-            <select
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800"
-              value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value })}
-            >
-              <option value="MEMBER">Member</option>
-              <option value="MANAGER">Manager</option>
-              <option value="ADMIN">Admin</option>
-            </select>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">Role</label>
+              <select
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white px-3 py-2.5 text-sm outline-none focus:border-gray-800 transition-colors appearance-none"
+                value={form.role}
+                onChange={(e) => setForm({ ...form, role: e.target.value })}
+              >
+                <option value="MEMBER">Member</option>
+                <option value="MANAGER">Manager</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+            {!isInvite && (
+              <div>
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">Department</label>
+                <input
+                  className="w-full rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white px-3 py-2.5 text-sm outline-none focus:border-gray-800 transition-colors"
+                  value={form.department}
+                  onChange={(e) => setForm({ ...form, department: e.target.value })}
+                  placeholder="e.g. Engineering"
+                />
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-gray-100 px-6 py-4">
+        <div className="flex justify-end gap-2 border-t border-gray-100 dark:border-gray-800 px-6 py-4 bg-gray-50/50 dark:bg-gray-900/50">
           <button
             onClick={onClose}
-            className="rounded-lg border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50"
+            className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
           >
             Cancel
           </button>
           <button
-            onClick={() => valid && onSave(form)}
+            onClick={() => {
+              if (isInvite) {
+                onInvite(form.email, selectedProjectId, form.role, form.position);
+              } else {
+                onSave(form);
+              }
+            }}
             disabled={!valid}
-            className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-40 hover:bg-gray-700"
+            className="rounded-xl bg-gray-900 dark:bg-white dark:text-gray-900 px-6 py-2 text-sm font-bold text-white disabled:opacity-40 hover:bg-gray-800 transition-all shadow-md"
           >
-            {initial ? "Save" : "Add"}
+            {isInvite ? "Send Invite" : "Save Changes"}
           </button>
         </div>
       </div>
@@ -302,16 +338,15 @@ export default function DashboardPage() {
       setEmployees((prev) => prev.filter((e) => e.id !== id));
   };
 
+  const handleInviteEmployee = (email: string, projectId: string, role: string, position: string) => {
+    // In a real app, this would call the API we created.
+    // For sample mode, we'll just show a toast.
+    import("react-hot-toast").then((t) => t.default.success(`Invite sent to ${email} for project ${projectId}`));
+    closeEmployeeModal();
+  };
+
   const handleSaveEmployee = (data: EmployeeFormData) => {
-    if (employeeModal === "add") {
-      const id = createSampleId("user");
-      setEmployees((prev) => [
-        ...prev,
-        { id, name: data.name, email: data.email, role: data.role,
-          imageUrl: null, position: data.position, department: data.department,
-          availability: "Available" },
-      ]);
-    } else if (employeeModal === "edit" && editEmployee) {
+    if (employeeModal === "edit" && editEmployee) {
       setEmployees((prev) =>
         prev.map((e) =>
           e.id === editEmployee.id
@@ -378,7 +413,15 @@ export default function DashboardPage() {
   return (
     <ProtectedRoute>
       {modal && <ProjectModal initial={initialForm} onSave={handleSave} onClose={closeModal} />}
-      {employeeModal && <EmployeeModal initial={employeeInitialForm} onSave={handleSaveEmployee} onClose={closeEmployeeModal} />}
+      {employeeModal && (
+        <EmployeeModal 
+          initial={employeeInitialForm} 
+          projects={projects}
+          onInvite={handleInviteEmployee}
+          onSave={handleSaveEmployee} 
+          onClose={closeEmployeeModal} 
+        />
+      )}
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors">
         <Navbar />
@@ -525,6 +568,7 @@ export default function DashboardPage() {
                     {e.name.charAt(0)}
                   </div>
                   <p className="mt-2.5 text-xs font-semibold text-gray-900 dark:text-white">{e.name}</p>
+                  <p className="mt-0.5 text-[10px] font-bold text-blue-600 dark:text-blue-400">{e.employeeId}</p>
                   <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">{e.position}</p>
                   <span
                     className={`mt-2 rounded-full px-2 py-0.5 text-xs font-medium ${

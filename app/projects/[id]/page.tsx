@@ -117,17 +117,18 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
     setModal(false);
   };
 
-  const handleSaveEmployees = (employeeIds: string[]) => {
-    const updatedEmployees = buildEmployees(project.id, employeeIds);
+  const handleUpdateMember = (userId: string, data: { role: string; position: string }) => {
+    const updatedMembers = project.members.map((m) =>
+      m.userId === userId ? { ...m, role: data.role, position: data.position } : m
+    );
     const updated = {
       ...project,
-      members: updatedEmployees,
+      members: updatedMembers,
       updatedAt: new Date().toISOString(),
     };
-    const idx = sampleProjects.findIndex(p => p.id === project.id);
-    if (idx !== -1) sampleProjects[idx] = updated;
-    setProject(updated);
-    setEmployeesModal(false);
+    const idx = sampleProjects.findIndex((p) => p.id === project.id);
+    if (idx !== -1) sampleProjects[idx] = updated as any;
+    setProject(updated as any);
   };
 
   const handleSaveTask = (data: TaskFormData) => {
@@ -178,7 +179,14 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
     <ProtectedRoute>
       {modal && <ProjectModal initial={initialForm} onSave={handleSave} onClose={() => setModal(false)} />}
       {taskModal && <TaskModal onSave={handleSaveTask} onClose={() => setTaskModal(false)} />}
-      {employeesModal && <ManageEmployeesModal initialEmployeeIds={project.members.map(m => m.userId)} onSave={handleSaveEmployees} onClose={() => setEmployeesModal(false)} />}
+      {employeesModal && (
+        <ManageEmployeesModal
+          projectId={project.id}
+          members={project.members}
+          onUpdateMember={handleUpdateMember}
+          onClose={() => setEmployeesModal(false)}
+        />
+      )}
       
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm transition-all">
@@ -301,7 +309,13 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
                   {project.members.map((e) => (
                     <div key={e.id} className="flex items-center gap-3 rounded-lg border border-gray-100 dark:border-gray-800 p-3">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-900 dark:bg-gray-800 text-sm font-bold text-white">{e.user.name.charAt(0)}</div>
-                      <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium text-gray-900 dark:text-white">{e.user.name}</p><p className="truncate text-xs text-gray-500 dark:text-gray-400">{e.user.position}</p></div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="truncate text-sm font-medium text-gray-900 dark:text-white">{e.user.name}</p>
+                          <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">{e.user.employeeId}</span>
+                        </div>
+                        <p className="truncate text-xs text-gray-500 dark:text-gray-400">{e.user.position}</p>
+                      </div>
                       {e.role === "MANAGER" || e.role === "ADMIN" ? <span className="shrink-0 rounded bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 text-[10px] font-bold tracking-wider text-blue-700 dark:text-blue-400">LEAD</span> : null}
                     </div>
                   ))}

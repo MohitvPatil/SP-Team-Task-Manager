@@ -12,6 +12,7 @@ export async function GET() {
     
     return {
       id: primary.id,
+      employeeId: primary.employeeId,
       name: primary.name,
       email: primary.email,
       role: primary.role,

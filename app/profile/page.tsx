@@ -21,7 +21,7 @@ export default function ProfilePage() {
               </h1>
 
               <p className="mt-2 text-gray-500">
-                Full Stack Developer
+                Full Stack Developer • <span className="font-bold text-black">EMP-001</span>
               </p>
             </div>
           </div>

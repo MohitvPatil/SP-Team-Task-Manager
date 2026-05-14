@@ -9,8 +9,9 @@ const now = baseDate.toISOString();
 const addDays = (days: number) =>
   new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
 
-export const sampleUser: SessionUser & { imageUrl: string | null } = {
+export const sampleUser: SessionUser & { employeeId: string; imageUrl: string | null } = {
   id: "sample-user-1",
+  employeeId: "EMP-001",
   name: "Mohit Patil",
   email: "demo@taskflow.local",
   role: "ADMIN",
@@ -26,6 +27,7 @@ export const sampleTeamMembers = [
   },
   {
     id: "sample-user-2",
+    employeeId: "EMP-002",
     name: "Arjun Mehta",
     email: "arjun@taskflow.local",
     role: "MANAGER" as Role,
@@ -36,6 +38,7 @@ export const sampleTeamMembers = [
   },
   {
     id: "sample-user-3",
+    employeeId: "EMP-003",
     name: "Neha Kapoor",
     email: "neha@taskflow.local",
     role: "MEMBER" as Role,
@@ -46,6 +49,7 @@ export const sampleTeamMembers = [
   },
   {
     id: "sample-user-4",
+    employeeId: "EMP-004",
     name: "Rohan Verma",
     email: "rohan@taskflow.local",
     role: "MEMBER" as Role,
@@ -56,6 +60,7 @@ export const sampleTeamMembers = [
   },
   {
     id: "sample-user-5",
+    employeeId: "EMP-005",
     name: "Sara Khan",
     email: "sara@taskflow.local",
     role: "MEMBER" as Role,
@@ -66,6 +71,7 @@ export const sampleTeamMembers = [
   },
   {
     id: "sample-user-6",
+    employeeId: "EMP-006",
     name: "Dev Patel",
     email: "dev@taskflow.local",
     role: "MEMBER" as Role,
@@ -76,6 +82,7 @@ export const sampleTeamMembers = [
   },
   {
     id: "sample-user-7",
+    employeeId: "EMP-007",
     name: "Meera Nair",
     email: "meera@taskflow.local",
     role: "MANAGER" as Role,
@@ -86,6 +93,7 @@ export const sampleTeamMembers = [
   },
   {
     id: "sample-user-8",
+    employeeId: "EMP-008",
     name: "Kabir Singh",
     email: "kabir@taskflow.local",
     role: "MEMBER" as Role,
@@ -96,6 +104,7 @@ export const sampleTeamMembers = [
   },
   {
     id: "sample-user-9",
+    employeeId: "EMP-009",
     name: "Ananya Rao",
     email: "ananya@taskflow.local",
     role: "MEMBER" as Role,
@@ -106,6 +115,7 @@ export const sampleTeamMembers = [
   },
   {
     id: "sample-user-10",
+    employeeId: "EMP-010",
     name: "Vikram Joshi",
     email: "vikram@taskflow.local",
     role: "MEMBER" as Role,

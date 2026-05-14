@@ -63,7 +63,9 @@ function EmployeeProfileOverlay({
                 {employee.department}
               </span>
             </div>
-            <p className="text-gray-500 dark:text-gray-400">{employee.position}</p>
+            <p className="text-gray-500 dark:text-gray-400">
+              {employee.position} <span className="mx-2 text-gray-300">•</span> <span className="font-bold text-blue-600 dark:text-blue-400">{employee.employeeId}</span>
+            </p>
           </div>
         </div>
 
@@ -158,7 +160,7 @@ function EmployeeProfileOverlay({
 
         {/* Footer Action */}
         <div className="flex items-center justify-between bg-gray-50 px-8 py-4 dark:bg-gray-900/50">
-          <p className="text-xs text-gray-500">Employee ID: {employee.id}</p>
+          <p className="text-xs text-gray-500">Employee ID: {employee.employeeId}</p>
           <button className="flex items-center gap-1.5 rounded-full bg-gray-900 px-6 py-2 text-xs font-bold text-white transition hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200">
             Export Records
           </button>
@@ -239,7 +241,10 @@ export default function EmployeesPage() {
                       {employee.name.charAt(0)}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-bold text-gray-900 dark:text-white truncate">{employee.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-gray-900 dark:text-white truncate">{employee.name}</h3>
+                        <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">{employee.employeeId}</span>
+                      </div>
                       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                         <span className="font-medium">{employee.position}</span>
                         <span className="h-1 w-1 rounded-full bg-gray-300 dark:bg-gray-600" />
