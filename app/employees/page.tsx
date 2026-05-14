@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Navbar from "@/components/ui/Navbar";
-import { EmployeeDetail } from "@/lib/employees-data";
+import { EmployeeFullDetail } from "@/lib/employees-data";
 import { 
   Mail, 
   Phone, 
@@ -24,7 +24,7 @@ function EmployeeProfileOverlay({
   employee, 
   onClose 
 }: { 
-  employee: EmployeeDetail; 
+  employee: EmployeeFullDetail; 
   onClose: () => void;
 }) {
   return (
@@ -170,10 +170,10 @@ function EmployeeProfileOverlay({
 
 // ── Main Page Component ────────────────────────────────────────────────────────
 export default function EmployeesPage() {
-  const [employees, setEmployees] = useState<EmployeeDetail[]>([]);
+  const [employees, setEmployees] = useState<EmployeeFullDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeDetail | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeFullDetail | null>(null);
 
   useEffect(() => {
     fetch("/api/employees")
