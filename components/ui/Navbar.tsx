@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import UserDropdown from "@/components/ui/UserDropdown";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import { LayoutDashboard, FolderKanban, CheckSquare, CalendarDays } from "lucide-react";
 
 const navLinks = [
@@ -16,12 +17,12 @@ export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
+    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950 transition-colors">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
         {/* Brand */}
         <Link
           href="/dashboard"
-          className="text-base font-bold tracking-tight text-gray-900"
+          className="text-base font-bold tracking-tight text-gray-900 dark:text-white"
         >
           TaskFlow
         </Link>
@@ -32,12 +33,12 @@ export default function Navbar() {
             const active = pathname === href;
             return (
               <Link
-                key={href}
+                key={label}
                 href={href}
                 className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                   active
-                    ? "bg-gray-100 text-gray-900"
-                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                    ? "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white"
+                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-200"
                 }`}
               >
                 <Icon size={15} />
@@ -48,7 +49,10 @@ export default function Navbar() {
         </nav>
 
         {/* Right side */}
-        <UserDropdown />
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <UserDropdown />
+        </div>
       </div>
     </header>
   );

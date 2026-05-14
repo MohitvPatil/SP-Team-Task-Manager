@@ -29,7 +29,7 @@ export const authCookies = {
 };
 
 export function generateToken(userId: string, role: string) {
-  return jwt.sign({ userId, role }, accessSecret(), { expiresIn: "15m" });
+  return jwt.sign({ userId, role }, accessSecret(), { expiresIn: "7d" });
 }
 
 export function generateRefreshToken(userId: string) {
