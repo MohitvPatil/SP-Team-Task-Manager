@@ -50,6 +50,13 @@ export default function MobileSidebar({
           </Link>
 
           <Link
+            href="/deadlines"
+            className="block"
+          >
+            Deadlines
+          </Link>
+
+          <Link
             href="/profile"
             className="block"
           >

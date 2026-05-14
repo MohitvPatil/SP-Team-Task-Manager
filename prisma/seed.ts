@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 async function main() {
   const admin = await prisma.user.upsert({
-    where: { email: "o.mohit@gmail.com" },
+    where: { email: "o.mohit@g.com" },
     update: {
       name: "Mohit",
       password: await bcrypt.hash("9809860999", 12),
@@ -12,7 +12,7 @@ async function main() {
     },
     create: {
       name: "Mohit",
-      email: "o.mohit@gmail.com",
+      email: "o.mohit@g.com",
       password: await bcrypt.hash("9809860999", 12),
       role: "ADMIN",
       emailVerifiedAt: new Date(),

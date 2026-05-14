@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   FolderKanban,
   CheckSquare,
+  CalendarDays,
   Settings,
   User,
 } from "lucide-react";
@@ -38,6 +39,14 @@ export default function Sidebar() {
         >
           <CheckSquare size={20} />
           <span>Tasks</span>
+        </Link>
+
+        <Link
+          href="/deadlines"
+          className="flex items-center gap-3"
+        >
+          <CalendarDays size={20} />
+          <span>Deadlines</span>
         </Link>
 
         <Link

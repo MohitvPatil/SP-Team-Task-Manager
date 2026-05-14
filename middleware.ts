@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const protectedRoutes = ["/dashboard", "/projects", "/tasks", "/settings", "/profile"];
+const protectedRoutes = ["/dashboard", "/projects", "/tasks", "/deadlines", "/settings", "/profile"];
 const accessCookie = "taskflow_access";
 const legacyCookie = "token";
 
@@ -20,5 +20,12 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/projects/:path*", "/tasks/:path*", "/settings/:path*", "/profile/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/projects/:path*",
+    "/tasks/:path*",
+    "/deadlines/:path*",
+    "/settings/:path*",
+    "/profile/:path*",
+  ],
 };

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import {
@@ -10,15 +11,27 @@ import {
 import EditProjectModal from "@/components/projects/EditProjectModal";
 
 interface ProjectCardProps {
+  id?: string;
   title: string;
   tasks: number;
   progress: number;
+  assignedAt?: string;
+  deadline?: string;
+  memberCount?: number;
+  health?: string;
+  state?: string;
 }
 
 export default function ProjectCard({
+  id,
   title,
   tasks,
   progress,
+  assignedAt,
+  deadline,
+  memberCount,
+  health,
+  state,
 }: ProjectCardProps) {
   const [open, setOpen] =
     useState(false);
@@ -30,15 +43,28 @@ export default function ProjectCard({
         onClose={() => setOpen(false)}
       />
 
-      <div className="rounded-2xl bg-white p-6 shadow">
+      <div className="rounded-lg bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">
-            {title}
-          </h2>
+          {id ? (
+            <Link href={`/projects/${id}`} className="text-xl font-bold hover:underline">
+              {title}
+            </Link>
+          ) : (
+            <h2 className="text-xl font-bold">
+              {title}
+            </h2>
+          )}
 
-          <span className="rounded-full bg-black px-3 py-1 text-xs text-white">
-            {tasks} Tasks
+          <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold">
+            {state || health || "Project"}
           </span>
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-3 text-sm text-gray-600">
+          <span>Assigned: {assignedAt || "No date"}</span>
+          <span>Deadline: {deadline || "No date"}</span>
+          <span>{tasks} Tasks</span>
+          <span>{memberCount ?? 0} Members</span>
         </div>
 
         <div className="mt-6 h-3 overflow-hidden rounded-full bg-gray-200">

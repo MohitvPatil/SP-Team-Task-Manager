@@ -6,6 +6,15 @@ import ProjectCard from "@/components/dashboard/ProjectCard";
 
 import useProjects from "@/hooks/useProjects";
 
+const dateText = (value?: string) =>
+  value
+    ? new Intl.DateTimeFormat("en", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }).format(new Date(value))
+    : undefined;
+
 export default function ProjectsList() {
   const {
     projects,
@@ -22,11 +31,17 @@ export default function ProjectsList() {
         (project: any) => (
           <ProjectCard
             key={project.id}
+            id={project.id}
             title={project.title}
             tasks={
-              project.tasks?.length || 0
+              project._count?.tasks || project.tasks?.length || 0
             }
-            progress={72}
+            progress={project.progress || 0}
+            assignedAt={dateText(project.assignedAt)}
+            deadline={dateText(project.deadline)}
+            memberCount={project.members?.length || 0}
+            health={project.health}
+            state={project.state === "COMPLETED" ? "Completed" : "Ongoing"}
           />
         )
       )}
