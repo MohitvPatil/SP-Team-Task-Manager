@@ -24,6 +24,9 @@ import {
   CalendarDays,
   Clock,
   TrendingUp,
+  Mail,
+  Bell,
+  CheckCircle2,
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -75,8 +78,20 @@ interface TeamEmployee {
   position: string;
   department: string;
   availability: string;
+  accepted?: boolean; // true = has registered, false = pending invite
 }
 
+interface PendingInvite {
+  email: string;
+  sentAt: string;
+}
+
+interface EditRoleFormData {
+  role: string;
+  position: string;
+}
+
+// EmployeeFormData kept for compatibility
 interface EmployeeFormData {
   name: string;
   email: string;
@@ -182,134 +197,141 @@ function ProjectCard({
   );
 }
 
-// ── Employee Modal ──────────────────────────────────────────────────────────────
-function EmployeeModal({
-  initial,
-  projects,
-  onInvite,
-  onSave,
-  onClose,
-}: {
-  initial: EmployeeFormData | null;
-  projects: Project[];
-  onInvite: (email: string, projectId: string, role: string, position: string) => void;
-  onSave: (d: EmployeeFormData) => void;
-  onClose: () => void;
-}) {
-  const [form, setForm] = useState<EmployeeFormData>(
-    initial ?? { name: "", email: "", position: "", role: "MEMBER", department: "" }
-  );
-  const [selectedProjectId, setSelectedProjectId] = useState(projects[0]?.id || "");
+// ── Invite Modal ───────────────────────────────────────────────────────────────
+function InviteModal({ onSend, onClose }: { onSend: (email: string) => void; onClose: () => void }) {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const isInvite = !initial;
-  const valid = isInvite 
-    ? form.email.trim() && form.position.trim() && selectedProjectId
-    : form.name.trim() && form.email.trim() && form.position.trim();
+  const handle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setLoading(true);
+    await new Promise((r) => setTimeout(r, 400)); // simulate API
+    onSend(email.trim());
+    setLoading(false);
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 transition-all">
-      <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-2xl overflow-hidden dark:bg-gray-950 dark:border-gray-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white dark:bg-gray-950 dark:border-gray-800 shadow-2xl overflow-hidden">
         <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
-          <h2 className="text-sm font-bold text-gray-900 dark:text-white">
-            {isInvite ? "Invite to Project" : "Edit Employee"}
-          </h2>
-          <button onClick={onClose} className="rounded-lg p-1 hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-400">
+          <div>
+            <h2 className="text-sm font-bold text-gray-900 dark:text-white">Invite Employee</h2>
+            <p className="text-[10px] text-gray-400 mt-0.5">They'll register using their Employee ID + company email</p>
+          </div>
+          <button onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900">
             <X size={16} />
           </button>
         </div>
 
-        <div className="space-y-4 px-6 py-5">
-          {isInvite && (
-            <div>
-              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">Project *</label>
-              <select
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white px-3 py-2.5 text-sm outline-none focus:border-gray-800 transition-colors appearance-none"
-                value={selectedProjectId}
-                onChange={(e) => setSelectedProjectId(e.target.value)}
-              >
-                {projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
-              </select>
-            </div>
-          )}
-
-          {!isInvite && (
-            <div>
-              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">Name *</label>
+        <form onSubmit={handle} className="px-6 py-5 space-y-4">
+          <div>
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">Email Address</label>
+            <div className="relative">
+              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white px-3 py-2.5 text-sm outline-none focus:border-gray-800 transition-colors"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="e.g. Rahul Sharma"
+                type="email"
+                placeholder="employee@company.com"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white pl-9 pr-4 py-2.5 text-sm outline-none focus:border-gray-800 transition-colors"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoFocus
               />
             </div>
-          )}
+          </div>
+
+          <div className="rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 px-4 py-3 text-xs text-blue-700 dark:text-blue-300 space-y-1">
+            <p className="font-semibold">How it works:</p>
+            <p>• Employee receives this invite & goes to <span className="font-bold">/register</span></p>
+            <p>• They enter their Employee ID + company email + password</p>
+            <p>• Profile auto-fills from the employee database</p>
+            <p>• You get notified once they accept — then you can set role & position</p>
+          </div>
+
+          <div className="flex gap-2 pt-1">
+            <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-gray-200 dark:border-gray-700 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+              Cancel
+            </button>
+            <button disabled={loading || !email.trim()} className="flex-1 rounded-xl bg-gray-900 dark:bg-white dark:text-gray-900 py-2.5 text-sm font-bold text-white hover:bg-gray-800 disabled:opacity-40 transition-all shadow-sm">
+              {loading ? "Sending..." : "Send Invite"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ── Edit Role Modal (only role + position, after employee has accepted) ─────────
+function EditRoleModal({
+  employee,
+  onSave,
+  onClose,
+}: {
+  employee: TeamEmployee;
+  onSave: (id: string, data: EditRoleFormData) => void;
+  onClose: () => void;
+}) {
+  const [form, setForm] = useState<EditRoleFormData>({
+    role: employee.role,
+    position: employee.position,
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white dark:bg-gray-950 dark:border-gray-800 shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+          <div>
+            <h2 className="text-sm font-bold text-gray-900 dark:text-white">Edit Role & Position</h2>
+            <p className="text-[10px] text-gray-400 mt-0.5">{employee.name} · {employee.employeeId}</p>
+          </div>
+          <button onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="px-6 py-5 space-y-4">
+          <div className="rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 px-4 py-3 space-y-1">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">From Employee Database (read-only)</p>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white">{employee.name}</p>
+            <p className="text-xs text-gray-500">{employee.email} · {employee.department}</p>
+          </div>
 
           <div>
-            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">Email Address *</label>
-            <input
-              type="email"
-              className="w-full rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white px-3 py-2.5 text-sm outline-none focus:border-gray-800 transition-colors"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              placeholder="e.g. rahul@company.com"
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">Position *</label>
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">Project Position *</label>
             <input
               className="w-full rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white px-3 py-2.5 text-sm outline-none focus:border-gray-800 transition-colors"
               value={form.position}
               onChange={(e) => setForm({ ...form, position: e.target.value })}
-              placeholder="e.g. Frontend Engineer"
+              placeholder="e.g. Senior Developer"
             />
           </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">Role</label>
-              <select
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white px-3 py-2.5 text-sm outline-none focus:border-gray-800 transition-colors appearance-none"
-                value={form.role}
-                onChange={(e) => setForm({ ...form, role: e.target.value })}
-              >
-                <option value="MEMBER">Member</option>
-                <option value="MANAGER">Manager</option>
-                <option value="ADMIN">Admin</option>
-              </select>
-            </div>
-            {!isInvite && (
-              <div>
-                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">Department</label>
-                <input
-                  className="w-full rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white px-3 py-2.5 text-sm outline-none focus:border-gray-800 transition-colors"
-                  value={form.department}
-                  onChange={(e) => setForm({ ...form, department: e.target.value })}
-                  placeholder="e.g. Engineering"
-                />
-              </div>
-            )}
+
+          <div>
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">Role</label>
+            <select
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white px-3 py-2.5 text-sm outline-none focus:border-gray-800 transition-colors appearance-none"
+              value={form.role}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+            >
+              <option value="MEMBER">Member</option>
+              <option value="MANAGER">Manager</option>
+              <option value="ADMIN">Admin</option>
+            </select>
           </div>
         </div>
 
         <div className="flex justify-end gap-2 border-t border-gray-100 dark:border-gray-800 px-6 py-4 bg-gray-50/50 dark:bg-gray-900/50">
-          <button
-            onClick={onClose}
-            className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
-          >
+          <button onClick={onClose} className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             Cancel
           </button>
           <button
-            onClick={() => {
-              if (isInvite) {
-                onInvite(form.email, selectedProjectId, form.role, form.position);
-              } else {
-                onSave(form);
-              }
-            }}
-            disabled={!valid}
+            onClick={() => onSave(employee.id, form)}
+            disabled={!form.position.trim()}
             className="rounded-xl bg-gray-900 dark:bg-white dark:text-gray-900 px-6 py-2 text-sm font-bold text-white disabled:opacity-40 hover:bg-gray-800 transition-all shadow-md"
           >
-            {isInvite ? "Send Invite" : "Save Changes"}
+            Save Changes
           </button>
         </div>
       </div>
@@ -325,44 +347,74 @@ export default function DashboardPage() {
   const [modal, setModal] = useState<"add" | "edit" | null>(null);
   const [editTarget, setEditTarget] = useState<Project | null>(null);
 
-  const [employees, setEmployees] = useState<TeamEmployee[]>(sampleTeamMembers);
-  const [employeeModal, setEmployeeModal] = useState<"add" | "edit" | null>(null);
+  // All accepted employees (have registered via invite)
+  const [employees, setEmployees] = useState<TeamEmployee[]>(
+    sampleTeamMembers.map((m) => ({ ...m, accepted: true }))
+  );
+  // Pending invites waiting for employee to register
+  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
+  // Notification banner for newly accepted invites
+  const [notifications, setNotifications] = useState<string[]>([]);
+
+  // Invite modal
+  const [inviteOpen, setInviteOpen] = useState(false);
+
+  // Edit role/position modal (only for accepted employees)
   const [editEmployee, setEditEmployee] = useState<TeamEmployee | null>(null);
 
-  const openAddEmployee = () => { setEditEmployee(null); setEmployeeModal("add"); };
-  const openEditEmployee = (e: TeamEmployee) => { setEditEmployee(e); setEmployeeModal("edit"); };
-  const closeEmployeeModal = () => { setEmployeeModal(null); setEditEmployee(null); };
+  const handleSendInvite = (email: string) => {
+    // Check not already a member or pending
+    if (employees.some((e) => e.email === email)) {
+      import("react-hot-toast").then((t) => t.default.error("This employee is already on the team."));
+      setInviteOpen(false);
+      return;
+    }
+    if (pendingInvites.some((p) => p.email === email)) {
+      import("react-hot-toast").then((t) => t.default.error("Invite already sent to this email."));
+      setInviteOpen(false);
+      return;
+    }
+    // Add to pending list
+    setPendingInvites((prev) => [...prev, { email, sentAt: new Date().toISOString() }]);
+    import("react-hot-toast").then((t) =>
+      t.default.success(`Invite sent to ${email}. They'll register using their Employee ID.`)
+    );
+    setInviteOpen(false);
+  };
+
+  // Simulates an employee accepting (for demo: click on pending card)
+  const simulateAccept = (email: string) => {
+    // In production: this would be triggered by the signup API
+    // Find matching sample member by email
+    const member = sampleTeamMembers.find((m) => m.email === email);
+    if (member) {
+      setEmployees((prev) => [...prev, { ...member, accepted: true }]);
+      setPendingInvites((prev) => prev.filter((p) => p.email !== email));
+      setNotifications((prev) => [
+        `${member.name} (${member.employeeId}) has accepted the invite and joined the team.`,
+        ...prev,
+      ]);
+    } else {
+      // Unknown employee — show notification with email
+      setPendingInvites((prev) => prev.filter((p) => p.email !== email));
+      setNotifications((prev) => [
+        `${email} has accepted the invite.`,
+        ...prev,
+      ]);
+    }
+  };
+
+  const handleSaveRole = (id: string, data: EditRoleFormData) => {
+    setEmployees((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, role: data.role, position: data.position } : e))
+    );
+    setEditEmployee(null);
+  };
 
   const handleDeleteEmployee = (id: string) => {
     if (window.confirm("Remove this employee from the team?"))
       setEmployees((prev) => prev.filter((e) => e.id !== id));
   };
-
-  const handleInviteEmployee = (email: string, projectId: string, role: string, position: string) => {
-    // In a real app, this would call the API we created.
-    // For sample mode, we'll just show a toast.
-    import("react-hot-toast").then((t) => t.default.success(`Invite sent to ${email} for project ${projectId}`));
-    closeEmployeeModal();
-  };
-
-  const handleSaveEmployee = (data: EmployeeFormData) => {
-    if (employeeModal === "edit" && editEmployee) {
-      setEmployees((prev) =>
-        prev.map((e) =>
-          e.id === editEmployee.id
-            ? { ...e, name: data.name, email: data.email, role: data.role,
-                position: data.position, department: data.department }
-            : e
-        )
-      );
-    }
-    closeEmployeeModal();
-  };
-
-  const employeeInitialForm: EmployeeFormData | null = editEmployee
-    ? { name: editEmployee.name, email: editEmployee.email, position: editEmployee.position,
-        role: editEmployee.role, department: editEmployee.department }
-    : null;
 
   const planning  = projects.filter((p) => p.state === "PLANNING");
   const ongoing   = projects.filter((p) => p.state === "ONGOING");
@@ -413,13 +465,12 @@ export default function DashboardPage() {
   return (
     <ProtectedRoute>
       {modal && <ProjectModal initial={initialForm} onSave={handleSave} onClose={closeModal} />}
-      {employeeModal && (
-        <EmployeeModal 
-          initial={employeeInitialForm} 
-          projects={projects}
-          onInvite={handleInviteEmployee}
-          onSave={handleSaveEmployee} 
-          onClose={closeEmployeeModal} 
+      {inviteOpen && <InviteModal onSend={handleSendInvite} onClose={() => setInviteOpen(false)} />}
+      {editEmployee && (
+        <EditRoleModal
+          employee={editEmployee}
+          onSave={handleSaveRole}
+          onClose={() => setEditEmployee(null)}
         />
       )}
 
@@ -539,73 +590,138 @@ export default function DashboardPage() {
             </section>
           )}
 
+          {/* Notification Banner */}
+          {notifications.length > 0 && (
+            <div className="mb-6 space-y-2">
+              {notifications.map((note, i) => (
+                <div key={i} className="flex items-center justify-between gap-3 rounded-xl border border-green-200 dark:border-green-900/40 bg-green-50 dark:bg-green-900/20 px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 size={16} className="text-green-600 dark:text-green-400 shrink-0" />
+                    <p className="text-sm font-medium text-green-800 dark:text-green-300">{note}</p>
+                  </div>
+                  <button onClick={() => setNotifications((prev) => prev.filter((_, idx) => idx !== i))} className="text-green-500 hover:text-green-700">
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Section 4: Team Employees */}
           <section className="mb-10">
             <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                  Team Employees
-                  <span className="ml-2 rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-xs font-normal text-gray-500 dark:text-gray-400">
-                    {employees.length}
+              <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                Team Employees
+                <span className="ml-2 rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-xs font-normal text-gray-500 dark:text-gray-400">
+                  {employees.length}
+                </span>
+                {pendingInvites.length > 0 && (
+                  <span className="ml-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 px-2 py-0.5 text-xs font-normal text-yellow-700 dark:text-yellow-500">
+                    {pendingInvites.length} pending
                   </span>
-                </h2>
+                )}
+              </h2>
               {isLead && (
                 <button
-                  onClick={openAddEmployee}
-                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800"
+                  onClick={() => setInviteOpen(true)}
+                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
                 >
-                  <Plus size={12} /> Add
+                  <Mail size={12} /> Invite
                 </button>
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              {employees.map((e) => (
-                <div
-                  key={e.id}
-                  className="group relative flex flex-col items-center rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-5 text-center transition-colors"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-900 text-sm font-bold text-white">
-                    {e.name.charAt(0)}
-                  </div>
-                  <p className="mt-2.5 text-xs font-semibold text-gray-900 dark:text-white">{e.name}</p>
-                  <p className="mt-0.5 text-[10px] font-bold text-blue-600 dark:text-blue-400">{e.employeeId}</p>
-                  <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">{e.position}</p>
-                  <span
-                    className={`mt-2 rounded-full px-2 py-0.5 text-xs font-medium ${
-                      e.role === "ADMIN"
-                        ? "bg-gray-900 text-white"
-                        : e.role === "MANAGER"
-                        ? "bg-blue-50 text-blue-700"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {e.role}
-                  </span>
-                  {e.department && (
-                    <p className="mt-1 text-xs text-gray-400">{e.department}</p>
-                  )}
-
-                  {isLead && (
-                    <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+            {/* Pending Invites */}
+            {pendingInvites.length > 0 && (
+              <div className="mb-4">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">Awaiting Registration</p>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                  {pendingInvites.map((inv) => (
+                    <div key={inv.email} className="group relative flex flex-col items-center rounded-xl border border-dashed border-yellow-300 dark:border-yellow-800 bg-yellow-50/50 dark:bg-yellow-900/10 px-4 py-5 text-center">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-sm font-bold text-yellow-600 dark:text-yellow-400">
+                        <Mail size={16} />
+                      </div>
+                      <p className="mt-2.5 text-[10px] font-semibold text-gray-700 dark:text-gray-300 break-all">{inv.email}</p>
+                      <span className="mt-1.5 rounded-full bg-yellow-100 dark:bg-yellow-900/40 px-2 py-0.5 text-[10px] font-medium text-yellow-700 dark:text-yellow-400">
+                        Invite Sent
+                      </span>
                       <button
-                        onClick={() => openEditEmployee(e)}
-                        title="Edit"
-                        className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        onClick={() => simulateAccept(inv.email)}
+                        title="Simulate Accept (demo)"
+                        className="mt-2 text-[10px] text-blue-500 hover:underline"
                       >
-                        <Pencil size={11} className="dark:text-gray-300" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteEmployee(e.id)}
-                        title="Remove"
-                        className="rounded-md border border-red-100 dark:border-red-900/30 bg-white dark:bg-red-950/20 p-1 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                      >
-                        <Trash2 size={11} className="text-red-500 dark:text-red-400" />
+                        Simulate Accept ↗
                       </button>
                     </div>
-                  )}
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
+
+            {/* Accepted Employees */}
+            {employees.length > 0 && (
+              <div>
+                {pendingInvites.length > 0 && (
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">Active Members</p>
+                )}
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                  {employees.map((e) => (
+                    <div
+                      key={e.id}
+                      className="group relative flex flex-col items-center rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-5 text-center transition-colors"
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-900 text-sm font-bold text-white">
+                        {e.name.charAt(0)}
+                      </div>
+                      <p className="mt-2.5 text-xs font-semibold text-gray-900 dark:text-white">{e.name}</p>
+                      <p className="mt-0.5 text-[10px] font-bold text-blue-600 dark:text-blue-400">{e.employeeId}</p>
+                      <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">{e.position}</p>
+                      <span
+                        className={`mt-2 rounded-full px-2 py-0.5 text-xs font-medium ${
+                          e.role === "ADMIN"
+                            ? "bg-gray-900 text-white"
+                            : e.role === "MANAGER"
+                            ? "bg-blue-50 text-blue-700"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {e.role}
+                      </span>
+                      {e.department && (
+                        <p className="mt-1 text-xs text-gray-400">{e.department}</p>
+                      )}
+
+                      {/* Only role + position editable, only after invite accepted */}
+                      {isLead && (
+                        <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                          <button
+                            onClick={() => setEditEmployee(e)}
+                            title="Edit Role & Position"
+                            className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                          >
+                            <Pencil size={11} className="dark:text-gray-300" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteEmployee(e.id)}
+                            title="Remove"
+                            className="rounded-md border border-red-100 dark:border-red-900/30 bg-white dark:bg-red-950/20 p-1 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                          >
+                            <Trash2 size={11} className="text-red-500 dark:text-red-400" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {employees.length === 0 && pendingInvites.length === 0 && (
+              <div className="rounded-xl border border-dashed border-gray-200 dark:border-gray-800 py-10 text-center">
+                <Bell size={24} className="mx-auto mb-2 text-gray-300 dark:text-gray-700" />
+                <p className="text-sm text-gray-400">No team members yet. Invite an employee to get started.</p>
+              </div>
+            )}
           </section>
 
           {/* Section 5: Completed Projects */}

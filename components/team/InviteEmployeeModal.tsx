@@ -8,7 +8,7 @@ import { inviteEmployee } from "@/services/teamService";
 interface InviteEmployeeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  projectId: string;
+  projectId?: string;
 }
 
 export default function InviteEmployeeModal({

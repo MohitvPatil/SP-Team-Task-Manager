@@ -10,48 +10,41 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { email, projectId, role, position } = await req.json();
+    const { email, projectId } = await req.json();
 
-    if (!email || !projectId) {
+    if (!email) {
       return NextResponse.json(
-        { message: "Missing required fields: email and projectId are required" },
+        { message: "Email is required" },
         { status: 400 }
       );
     }
 
     const token = crypto.randomBytes(32).toString("hex");
 
-    const invite = await prisma.projectInvite.upsert({
-      where: {
-        email_projectId: {
-          email,
-          projectId,
-        },
-      },
-      update: {
-        role: role || "MEMBER",
-        position: position || "Staff",
-        token,
-        accepted: false,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      },
-      create: {
-        email,
-        projectId,
-        role: role || "MEMBER",
-        position: position || "Staff",
-        token,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      },
-    });
+    const inviteData: any = {
+      token,
+      accepted: false,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    };
 
+    if (projectId) {
+      // Project-specific invite
+      const invite = await prisma.projectInvite.upsert({
+        where: { email_projectId: { email, projectId } },
+        update: { token, accepted: false, expiresAt: inviteData.expiresAt },
+        create: { email, projectId, ...inviteData },
+      });
+      return NextResponse.json({
+        message: `Invitation sent to ${email}`,
+        invite: { id: invite.id, email: invite.email, token: invite.token },
+      });
+    }
+
+    // Team-level invite (no specific project yet)
+    // In production: send an email with the registration link
     return NextResponse.json({
-      message: `Invitation sent to ${email}`,
-      invite: {
-        id: invite.id,
-        email: invite.email,
-        token: invite.token,
-      },
+      message: `Invitation sent to ${email}. They will receive a link to register using their Employee ID and company email.`,
+      registrationLink: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/register`,
     });
   } catch (error: any) {
     console.error("Invite error:", error);

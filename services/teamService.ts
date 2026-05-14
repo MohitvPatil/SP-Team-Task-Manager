@@ -2,13 +2,13 @@ import api from "@/lib/axios";
 
 export const inviteEmployee = async (
   email: string,
-  projectId: string,
+  projectId?: string,
   role: string = "MEMBER",
   position: string = "Staff"
 ) => {
   const response = await api.post("/api/team/invite", {
     email,
-    projectId,
+    ...(projectId ? { projectId } : {}),
     role,
     position,
   });
