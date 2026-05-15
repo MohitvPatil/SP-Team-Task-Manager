@@ -185,7 +185,7 @@ export const sampleProjects = [
     assignedAt: addDays(-10),
     deadline: addDays(20),
     completedAt: null,
-    state: "ONGOING",
+    state: "ON_HOLD",
     health: "On Track",
     progress: 55,
     ownerId: sampleUser.id,

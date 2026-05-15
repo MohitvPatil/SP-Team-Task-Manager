@@ -78,17 +78,7 @@ interface TeamEmployee {
   position: string;
   department: string;
   availability: string;
-  accepted?: boolean; // true = has registered, false = pending invite
-}
-
-
-// EmployeeFormData kept for compatibility
-interface EmployeeFormData {
-  name: string;
-  email: string;
-  position: string;
-  role: string;
-  department: string;
+  accepted?: boolean;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -188,12 +178,44 @@ function ProjectCard({
   );
 }
 
+// ── Skeleton Components ──────────────────────────────────────────────────────
+function ProjectSkeleton() {
+  return (
+    <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-950">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-2">
+          <div className="h-4 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
+          <div className="h-3 w-48 animate-pulse rounded bg-gray-100 dark:bg-gray-900" />
+        </div>
+        <div className="h-5 w-12 animate-pulse rounded bg-gray-100 dark:bg-gray-900" />
+      </div>
+      <div className="space-y-3">
+        <div className="h-1.5 w-full animate-pulse rounded-full bg-gray-100 dark:bg-gray-900" />
+        <div className="flex gap-2">
+          <div className="h-6 w-12 animate-pulse rounded-full bg-gray-100 dark:bg-gray-900" />
+          <div className="h-6 w-12 animate-pulse rounded-full bg-gray-100 dark:bg-gray-900" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EmployeeMiniSkeleton() {
+  return (
+    <div className="flex flex-col items-center rounded-xl border border-gray-100 bg-white px-4 py-5 dark:border-gray-900 dark:bg-gray-950">
+      <div className="h-10 w-10 animate-pulse rounded-full bg-gray-200 dark:bg-gray-800" />
+      <div className="mt-3 h-3 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
+      <div className="mt-1.5 h-2 w-12 animate-pulse rounded bg-gray-100 dark:bg-gray-900" />
+    </div>
+  );
+}
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const isLead = sampleUser.role === "ADMIN" || sampleUser.role === "MANAGER";
 
-  const [projects, setProjects] = useState<Project[]>(sampleProjects);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<"add" | "edit" | null>(null);
   const [editTarget, setEditTarget] = useState<Project | null>(null);
 
@@ -216,6 +238,12 @@ export default function DashboardPage() {
           accepted: true,
         }));
         setEmployees(mapped);
+        
+        // Simulate project loading
+        setTimeout(() => {
+          setProjects(sampleProjects);
+          setLoading(false);
+        }, 500);
       });
   }, []);
 
@@ -269,7 +297,6 @@ export default function DashboardPage() {
     <ProtectedRoute>
       {modal && <ProjectModal initial={initialForm} onSave={handleSave} onClose={closeModal} />}
 
-
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors">
         <Navbar />
 
@@ -311,7 +338,11 @@ export default function DashboardPage() {
                   </span>
                 </h2>
               </div>
-              {planning.length === 0 ? (
+              {loading ? (
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {[...Array(3)].map((_, i) => <ProjectSkeleton key={i} />)}
+                </div>
+              ) : planning.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-gray-200 dark:border-gray-800 py-6 text-center text-sm text-gray-400">
                   No projects in planning.
                 </div>
@@ -335,7 +366,11 @@ export default function DashboardPage() {
                 </span>
               </h2>
             </div>
-            {ongoing.length === 0 ? (
+            {loading ? (
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {[...Array(3)].map((_, i) => <ProjectSkeleton key={i} />)}
+              </div>
+            ) : ongoing.length === 0 ? (
               <div className="rounded-xl border border-dashed border-gray-200 dark:border-gray-800 py-6 text-center text-sm text-gray-400">
                 No ongoing projects.
               </div>
@@ -349,24 +384,27 @@ export default function DashboardPage() {
           </section>
 
           {/* Section 3: On Hold */}
-          {onHold.length > 0 && (
-            <section className="mb-10">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                  On Hold
-                  <span className="ml-2 rounded-full bg-yellow-100 dark:bg-yellow-900/30 px-2 py-0.5 text-xs font-normal text-yellow-700 dark:text-yellow-500">
-                    {onHold.length}
-                  </span>
-                </h2>
+          <section className="mb-10">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                On Hold
+                <span className="ml-2 rounded-full bg-yellow-100 dark:bg-yellow-900/30 px-2 py-0.5 text-xs font-normal text-yellow-700 dark:text-yellow-500">
+                  {onHold.length}
+                </span>
+              </h2>
+            </div>
+            {onHold.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-gray-200 dark:border-gray-800 py-6 text-center text-sm text-gray-400">
+                No projects on hold.
               </div>
+            ) : (
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {onHold.map((p) => (
                   <ProjectCard key={p.id} project={p} isLead={isLead} onStatusChange={handleStatusChange} />
                 ))}
               </div>
-            </section>
-          )}
-
+            )}
+          </section>
 
           {/* Section 4: Team Employees */}
           <section className="mb-10">
@@ -379,9 +417,11 @@ export default function DashboardPage() {
               </h2>
             </div>
 
-
-            {/* Accepted Employees */}
-            {employees.length > 0 && (
+            {loading ? (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                {[...Array(5)].map((_, i) => <EmployeeMiniSkeleton key={i} />)}
+              </div>
+            ) : employees.length > 0 ? (
               <div>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                   {employees.map((e) => (
@@ -408,14 +448,11 @@ export default function DashboardPage() {
                       {e.department && (
                         <p className="mt-1 text-xs text-gray-400">{e.department}</p>
                       )}
-
                     </div>
                   ))}
                 </div>
               </div>
-            )}
-
-            {employees.length === 0 && (
+            ) : (
               <div className="rounded-xl border border-dashed border-gray-200 dark:border-gray-800 py-10 text-center">
                 <Bell size={24} className="mx-auto mb-2 text-gray-300 dark:text-gray-700" />
                 <p className="text-sm text-gray-400">No team members yet.</p>

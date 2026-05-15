@@ -270,23 +270,27 @@ export default function ProjectsPage() {
           </section>
 
           {/* ── Section 3: On Hold ── */}
-          {onHold.length > 0 && (
-            <section className="mb-10">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                  On Hold
-                  <span className="ml-2 rounded-full bg-yellow-100 dark:bg-yellow-900/30 px-2 py-0.5 text-xs font-normal text-yellow-700 dark:text-yellow-500">
-                    {onHold.length}
-                  </span>
-                </h2>
+          <section className="mb-10">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                On Hold
+                <span className="ml-2 rounded-full bg-yellow-100 dark:bg-yellow-900/30 px-2 py-0.5 text-xs font-normal text-yellow-700 dark:text-yellow-500">
+                  {onHold.length}
+                </span>
+              </h2>
+            </div>
+            {onHold.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-gray-200 dark:border-gray-800 py-6 text-center text-sm text-gray-400">
+                No projects on hold.
               </div>
+            ) : (
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {onHold.map((p) => (
                   <ProjectCard key={p.id} project={p} isLead={isLead} onStatusChange={handleStatusChange} />
                 ))}
               </div>
-            </section>
-          )}
+            )}
+          </section>
 
           {/* ── Section 4: Completed ── */}
           <section>

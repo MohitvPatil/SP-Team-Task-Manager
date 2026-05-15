@@ -62,15 +62,13 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
 
   const isLead = sampleUser.role === "ADMIN" || sampleUser.role === "MANAGER";
 
-  const initialProject = sampleProjects.find((p) => p.id === id);
-  if (!initialProject) return notFound();
-
-  const [project, setProject] = useState(initialProject);
-
+  const [project, setProject] = useState(() => sampleProjects.find((p) => p.id === id));
   const [tasks, setTasks] = useState<typeof sampleTasks>(() => sampleTasks.filter((t) => t.projectId === id));
   const [comments, setComments] = useState<typeof sampleComments>(() => 
     sampleComments.filter((c) => c.taskId && sampleTasks.find(t => t.id === c.taskId && t.projectId === id))
   );
+
+  if (!project) return notFound();
 
   const toggleTask = (taskId: string) => {
     setTasks(prev => prev.map(t => {

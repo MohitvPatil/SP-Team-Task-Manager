@@ -193,7 +193,7 @@ function InviteModal({ onSend, onClose }: { onSend: (email: string) => void; onC
         <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
           <div>
             <h2 className="text-sm font-bold text-gray-900 dark:text-white">Invite Employee</h2>
-            <p className="text-[10px] text-gray-400 mt-0.5">They'll register using their Employee ID + company email</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">They&apos;ll register using their Employee ID + company email</p>
           </div>
           <button onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900">
             <X size={16} />
@@ -367,6 +367,30 @@ function EditRoleModal({
   );
 }
 
+// ── Skeleton Loader ───────────────────────────────────────────────────────────
+function EmployeeSkeleton() {
+  return (
+    <div className="grid grid-cols-12 items-center rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-900 dark:bg-gray-950">
+      <div className="col-span-5 flex items-center gap-4">
+        <div className="h-12 w-12 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-800" />
+        <div className="space-y-2">
+          <div className="h-4 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
+          <div className="h-3 w-48 animate-pulse rounded bg-gray-100 dark:bg-gray-900" />
+        </div>
+      </div>
+      <div className="col-span-3 hidden md:block">
+        <div className="h-2 w-40 animate-pulse rounded bg-gray-100 dark:bg-gray-900" />
+      </div>
+      <div className="col-span-2 hidden md:block">
+        <div className="h-2 w-20 animate-pulse rounded bg-gray-100 dark:bg-gray-900" />
+      </div>
+      <div className="col-span-2 flex justify-end">
+        <div className="h-8 w-24 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-900" />
+      </div>
+    </div>
+  );
+}
+
 // ── Main Page Component ────────────────────────────────────────────────────────
 export default function EmployeesPage() {
   const isLead = sampleUser.role === "ADMIN" || sampleUser.role === "MANAGER";
@@ -468,8 +492,10 @@ export default function EmployeesPage() {
           </div>
 
           {loading ? (
-            <div className="flex h-64 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-gray-900 dark:border-gray-700 dark:border-t-white" />
+            <div className="grid grid-cols-1 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <EmployeeSkeleton key={i} />
+              ))}
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
